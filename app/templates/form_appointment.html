@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<form method="post">
+  <div class="mb-3"><input class="form-control" name="patient_id" placeholder="ID do Paciente"></div>
+  <div class="mb-3"><input class="form-control" name="doctor_id" placeholder="ID do Médico"></div>
+  <div class="mb-3"><input class="form-control" name="date" placeholder="Data/Hora (ex: 2025-06-01 10:00)"></div>
+  <button class="btn btn-primary">Agendar</button>
+</form>
+{% endblock %}

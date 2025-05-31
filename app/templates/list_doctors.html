@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Médicos</h2>
+<a href="/form/doctor" class="btn btn-sm btn-success mb-3">Novo Médico</a>
+<table class="table table-striped">
+<tr><th>Nome</th><th>Endereço da Clínica</th><th>Ações</th></tr>
+{% for d in doctors %}
+<tr>
+  <td>{{ d.first_name }} {{ d.last_name }}</td>
+  <td>{{ d.clinic_address }}</td>
+  <td><a href="/delete/doctor/{{ d.id }}" class="btn btn-danger btn-sm">Excluir</a></td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}

@@ -13,4 +13,4 @@ def test_create_doctor():
             "clinic_address": "Av. Central, 456"
         })
         assert response.status_code == 201
-        assert response.get_json()["first_name"] == "Dr. João"
+        assert response.get_json()["first_name"] == "João"

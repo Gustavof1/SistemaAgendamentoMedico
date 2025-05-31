@@ -9,8 +9,8 @@ def test_create_appointment_without_conflict():
     with app.app_context():
         db.drop_all()
         db.create_all()
-        p = Patient(name="Joana")
-        d = Doctor(name="Dr. José")
+        p = Patient(first_name="Joana", last_name="Oliveira", phone="111", address="Rua B")
+        d = Doctor(first_name="José", last_name="Lima", clinic_address="Rua Clínica")
         db.session.add_all([p, d])
         db.session.commit()
         response = client.post("/appointments/", json={
@@ -26,8 +26,8 @@ def test_create_appointment_with_conflict():
     with app.app_context():
         db.drop_all()
         db.create_all()
-        p = Patient(name="Ana")
-        d = Doctor(name="Dr. Paulo")
+        p = Patient(first_name="Ana", last_name="Carvallho", phone="111", address="Rua B")
+        d = Doctor(first_name="Paulo", last_name="Silva", clinic_address="Rua Clínica")
         db.session.add_all([p, d])
         db.session.commit()
         client.post("/appointments/", json={

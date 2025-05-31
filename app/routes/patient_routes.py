@@ -6,8 +6,19 @@ bp = Blueprint('patients', __name__, url_prefix='/patients')
 
 @bp.route('/', methods=['POST'])
 def create_patient():
-    data = request.json
-    patient = Patient(name=data['name'])
+    data = request.get_json()
+    patient = Patient(
+        first_name=data['first_name'],
+        last_name=data['last_name'],
+        phone=data['phone'],
+        address=data['address']
+    )
     db.session.add(patient)
     db.session.commit()
-    return jsonify({"id": patient.id, "name": patient.name}), 201
+    return jsonify({
+        "id": patient.id,
+        "first_name": patient.first_name,
+        "last_name": patient.last_name,
+        "phone": patient.phone,
+        "address": patient.address
+    }), 201

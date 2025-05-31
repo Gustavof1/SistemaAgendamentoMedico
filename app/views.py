@@ -30,12 +30,28 @@ def form_patient():
             first_name=request.form["first_name"],
             last_name=request.form["last_name"],
             phone=request.form["phone"],
-            address=request.form["address"]
+            address=request.form["address"],
+            email=request.form.get("email")
         )
         db.session.add(p)
         db.session.commit()
         return redirect("/patients")
     return render_template("form_patient.html")
+
+@bp.route("/edit/patient/<int:id>", methods=["GET", "POST"])
+def edit_patient(id):
+    patient = db.session.get(Patient, id)
+    if not patient:
+        return "Paciente não encontrado", 404
+    if request.method == "POST":
+        patient.first_name = request.form["first_name"]
+        patient.last_name = request.form["last_name"]
+        patient.phone = request.form["phone"]
+        patient.address = request.form["address"]
+        patient.email = request.form.get("email")
+        db.session.commit()
+        return redirect("/patients")
+    return render_template("form_patient.html", patient=patient, edit=True)
 
 @bp.route("/form/doctor", methods=["GET", "POST"])
 def form_doctor():
@@ -50,16 +66,33 @@ def form_doctor():
         return redirect("/doctors")
     return render_template("form_doctor.html")
 
+@bp.route("/edit/doctor/<int:id>", methods=["GET", "POST"])
+def edit_doctor(id):
+    doctor = db.session.get(Doctor, id)
+    if not doctor:
+        return "Médico não encontrado", 404
+    if request.method == "POST":
+        doctor.first_name = request.form["first_name"]
+        doctor.last_name = request.form["last_name"]
+        doctor.clinic_address = request.form["clinic_address"]
+        db.session.commit()
+        return redirect("/doctors")
+    return render_template("form_doctor.html", doctor=doctor, edit=True)
+
 @bp.route("/delete/patient/<int:id>")
 def delete_patient(id):
-    patient = Patient.query.get(id)
+    patient = db.session.get(Patient, id)
+    if not patient:
+        return redirect("/patients")
     db.session.delete(patient)
     db.session.commit()
     return redirect("/patients")
 
 @bp.route("/delete/doctor/<int:id>")
 def delete_doctor(id):
-    doctor = Doctor.query.get(id)
+    doctor = db.session.get(Doctor, id)
+    if not doctor:
+        return redirect("/doctors")
     db.session.delete(doctor)
     db.session.commit()
     return redirect("/doctors")

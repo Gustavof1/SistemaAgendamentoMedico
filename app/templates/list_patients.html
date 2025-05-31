@@ -3,13 +3,17 @@
 <h2>Pacientes</h2>
 <a href="/form/patient" class="btn btn-sm btn-success mb-3">Novo Paciente</a>
 <table class="table table-striped">
-<tr><th>Nome</th><th>Telefone</th><th>Endereço</th><th>Ações</th></tr>
+<tr><th>Nome</th><th>Telefone</th><th>Endereço</th><th>Email</th><th>Ações</th></tr>
 {% for p in patients %}
 <tr>
   <td>{{ p.first_name }} {{ p.last_name }}</td>
   <td>{{ p.phone }}</td>
   <td>{{ p.address }}</td>
-  <td><a href="/delete/patient/{{ p.id }}" class="btn btn-danger btn-sm">Excluir</a></td>
+  <td>{{ p.email }}</td>
+  <td>
+    <a href="/edit/patient/{{ p.id }}" class="btn btn-warning btn-sm">Editar</a>
+    <a href="/delete/patient/{{ p.id }}" class="btn btn-danger btn-sm">Excluir</a>
+  </td>
 </tr>
 {% endfor %}
 </table>

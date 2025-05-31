@@ -1,10 +1,21 @@
 {% extends "base.html" %}
 {% block content %}
 <form method="post">
-  <div class="mb-3"><input class="form-control" name="first_name" placeholder="Nome"></div>
-  <div class="mb-3"><input class="form-control" name="last_name" placeholder="Sobrenome"></div>
-  <div class="mb-3"><input class="form-control" name="phone" placeholder="Telefone"></div>
-  <div class="mb-3"><input class="form-control" name="address" placeholder="Endereço"></div>
-  <button class="btn btn-primary">Cadastrar</button>
+  <div class="mb-3">
+    <input class="form-control" name="first_name" placeholder="Nome" value="{{ patient.first_name if edit else '' }}">
+  </div>
+  <div class="mb-3">
+    <input class="form-control" name="last_name" placeholder="Sobrenome" value="{{ patient.last_name if edit else '' }}">
+  </div>
+  <div class="mb-3">
+    <input class="form-control" name="phone" placeholder="Telefone" value="{{ patient.phone if edit else '' }}">
+  </div>
+  <div class="mb-3">
+    <input class="form-control" name="address" placeholder="Endereço" value="{{ patient.address if edit else '' }}">
+  </div>
+  <div class="mb-3">
+    <input class="form-control" name="email" placeholder="Email" value="{{ patient.email if edit else '' }}">
+  </div>
+  <button class="btn btn-primary">{{ 'Salvar' if edit else 'Cadastrar' }}</button>
 </form>
 {% endblock %}

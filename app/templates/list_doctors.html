@@ -8,7 +8,10 @@
 <tr>
   <td>{{ d.first_name }} {{ d.last_name }}</td>
   <td>{{ d.clinic_address }}</td>
-  <td><a href="/delete/doctor/{{ d.id }}" class="btn btn-danger btn-sm">Excluir</a></td>
+  <td>
+    <a href="/edit/doctor/{{ d.id }}" class="btn btn-warning btn-sm">Editar</a>
+    <a href="/delete/doctor/{{ d.id }}" class="btn btn-danger btn-sm">Excluir</a>
+  </td>
 </tr>
 {% endfor %}
 </table>

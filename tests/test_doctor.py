@@ -14,3 +14,24 @@ def test_create_doctor():
         })
         assert response.status_code == 201
         assert response.get_json()["first_name"] == "João"
+
+def test_edit_doctor():
+    app = create_app()
+    client = app.test_client()
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
+        resp = client.post("/doctors/", json={
+            "first_name": "Pedro",
+            "last_name": "Almeida",
+            "clinic_address": "Rua X, 123"
+        })
+        did = resp.get_json()["id"]
+        response = client.put(f"/doctors/{did}", json={
+            "first_name": "Pedro",
+            "last_name": "Almeida",
+            "clinic_address": "Rua Y, 999"
+        })
+        assert response.status_code == 200
+        data = response.get_json()
+        assert data["clinic_address"] == "Rua Y, 999"

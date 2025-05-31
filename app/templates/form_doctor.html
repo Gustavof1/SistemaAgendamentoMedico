@@ -1,9 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
 <form method="post">
-  <div class="mb-3"><input class="form-control" name="first_name" placeholder="Nome"></div>
-  <div class="mb-3"><input class="form-control" name="last_name" placeholder="Sobrenome"></div>
-  <div class="mb-3"><input class="form-control" name="clinic_address" placeholder="Endereço da Clínica"></div>
-  <button class="btn btn-primary">Cadastrar</button>
+  <div class="mb-3">
+    <input class="form-control" name="first_name" placeholder="Nome" value="{{ doctor.first_name if edit else '' }}">
+  </div>
+  <div class="mb-3">
+    <input class="form-control" name="last_name" placeholder="Sobrenome" value="{{ doctor.last_name if edit else '' }}">
+  </div>
+  <div class="mb-3">
+    <input class="form-control" name="clinic_address" placeholder="Endereço da Clínica" value="{{ doctor.clinic_address if edit else '' }}">
+  </div>
+  <button class="btn btn-primary">{{ 'Salvar' if edit else 'Cadastrar' }}</button>
 </form>
 {% endblock %}

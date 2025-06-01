@@ -85,4 +85,29 @@ def test_edit_doctor_not_found():
         })
         assert resp.status_code == 404
         assert b"Medico nao encontrado" in resp.data
-        
+
+def test_edit_doctor_missing_field():
+    app = create_app()
+    client = app.test_client()
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
+        # Cria médico válido
+        resp = client.post("/doctors/", json={
+            "first_name": "Pedro",
+            "last_name": "Almeida",
+            "clinic_address": "Rua X, 123",
+            "specialty": "Cardiologia",
+            "email": "pedroalmeida@email.com"
+        })
+        did = resp.get_json()["id"]
+        # Tenta editar com campo vazio
+        response = client.put(f"/doctors/{did}", json={
+            "first_name": "",
+            "last_name": "Almeida",
+            "clinic_address": "Rua X, 123",
+            "specialty": "Cardiologia",
+            "email": "pedroalmeida@email.com"
+        })
+        assert response.status_code == 400
+        assert b"Campo obrigatorio ausente" in response.data

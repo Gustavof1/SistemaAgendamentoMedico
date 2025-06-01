@@ -65,3 +65,4 @@ def test_patient_not_found():
         })
         assert resp.status_code == 404
         assert b"Paciente nao encontrado" in resp.data
+

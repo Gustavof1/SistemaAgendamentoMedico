@@ -24,7 +24,7 @@ jobs:
           pip install -r requirements.txt
       - name: Rodar Testes (Linux-MacOS)
         if: runner.os != 'Windows'
-        run: PYTHONPATH=. pytest
+        run: PYTHONPATH=. python -m pytest
       - name: Rodar Testes (Windows)
         if: runner.os == 'Windows'
         run: $env:PYTHONPATH="."; pytest

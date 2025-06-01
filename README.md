@@ -53,3 +53,9 @@ A interface web foi construída com Bootstrap.
    ```bash
    python -m pytest
    ```
+
+5. Como conferir a cobertura dos testes:
+   ```bash
+   python -m coverage run -m pytest
+   python -m coverage report
+   ```

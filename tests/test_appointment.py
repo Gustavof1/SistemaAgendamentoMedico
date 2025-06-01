@@ -313,3 +313,22 @@ def test_doctor_total_earned():
         })
         total = d.total_earned()
         assert total == 300
+
+def test_create_appointment_with_invalid_patient():
+    app = create_app()
+    client = app.test_client()
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
+        d = Doctor(first_name="José", last_name="Lima", email="doutorjoselima@email.com", specialty="Pediatra", clinic_address="Rua Clínica")
+        db.session.add(d)
+        db.session.commit()
+        # Usar patient_id inexistente
+        resp = client.post("/appointments/", json={
+            "patient_id": 9999,
+            "doctor_id": d.id,
+            "date": "2025-06-01 10:00",
+            "price": 200
+        })
+        assert resp.status_code == 404
+        assert b"Paciente nao encontrado" in resp.data

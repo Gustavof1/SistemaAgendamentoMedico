@@ -14,7 +14,7 @@ def create_appointment():
     price = float(data.get('price', 0))
     patient = db.session.get(Patient, data['patient_id'])
     if not patient:
-        return jsonify({"error": "Paciente não encontrado"}), 404
+        return jsonify({"error": "Paciente nao encontrado"}), 404
     if patient.has_insurance:
         price_paid = price * 0.5
     else:

@@ -51,5 +51,5 @@ A interface web foi construída com Bootstrap.
 
 4. Como rodar os testes:
    ```bash
-   pytest
+   python -m pytest
    ```

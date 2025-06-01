@@ -49,3 +49,19 @@ def test_edit_patient():
         assert data["address"] == "Rua Nova, 789"
         assert data["email"] == "carloseditado@teste.com"
         assert data["has_insurance"] is True
+
+def test_patient_not_found():
+    app = create_app()
+    client = app.test_client()
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
+        resp = client.put("/patients/9999", json={
+            "first_name": "Inexistente",
+            "last_name": "Paciente",
+            "phone": "11999999999",
+            "address": "Rua Ficticia, 000",
+            "email": "novo@email.com"
+        })
+        assert resp.status_code == 404
+        assert b"Paciente nao encontrado" in resp.data

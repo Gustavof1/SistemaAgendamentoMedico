@@ -36,7 +36,7 @@ def edit_patient(id):
     data = request.get_json()
     patient = db.session.get(Patient, id)
     if not patient:
-        return jsonify({"error": "Paciente não encontrado"}), 404
+        return jsonify({"error": "Paciente nao encontrado"}), 404
     for field in ['first_name', 'last_name', 'phone', 'address', 'email']:
         if field in data and not data[field]:
             return jsonify({"error": f"Campo obrigatorio ausente: {field}"}), 400

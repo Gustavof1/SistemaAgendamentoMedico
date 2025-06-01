@@ -18,3 +18,12 @@ def create_appointment():
     db.session.add(appointment)
     db.session.commit()
     return jsonify({"id": appointment.id}), 201
+
+@bp.route('/<int:id>', methods=['DELETE'])
+def cancel_appointment(id):
+    ap = db.session.get(Appointment, id)
+    if not ap:
+        return jsonify({"error": "Consulta nao encontrada"}), 404
+    db.session.delete(ap)
+    db.session.commit()
+    return jsonify({"message": "Consulta cancelada"}), 200

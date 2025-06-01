@@ -4,6 +4,7 @@ from .models.doctor import Doctor
 from .models.appointment import Appointment
 from .utils import has_conflict
 from .database import db
+from datetime import datetime, timedelta
 
 bp = Blueprint('views', __name__)
 
@@ -15,13 +16,13 @@ def home():
 def list_patients():
     sort = request.args.get("sort", "first_name")
     patients = Patient.query.order_by(getattr(Patient, sort)).all()
-    return render_template("list_patients.html", patients=patients)
+    return render_template("list_patients.html", patients=patients, sort=sort)
 
 @bp.route("/doctors")
 def list_doctors():
     sort = request.args.get("sort", "first_name")
     doctors = Doctor.query.order_by(getattr(Doctor, sort)).all()
-    return render_template("list_doctors.html", doctors=doctors)
+    return render_template("list_doctors.html", doctors=doctors, sort=sort)
 
 @bp.route("/form/patient", methods=["GET", "POST"])
 def form_patient():
@@ -97,15 +98,59 @@ def delete_doctor(id):
     db.session.commit()
     return redirect("/doctors")
 
+@bp.route("/calendar")
+def calendar():
+    sort = request.args.get("sort", "date")
+    appointments = Appointment.query.order_by(getattr(Appointment, sort)).all()
+    doctors = {d.id: f"{d.first_name} {d.last_name}" for d in Doctor.query.all()}
+    patients = {p.id: f"{p.first_name} {p.last_name}" for p in Patient.query.all()}
+    return render_template("calendar.html", appointments=appointments, doctors=doctors, patients=patients, sort=sort)
+
 @bp.route("/form/appointment", methods=["GET", "POST"])
 def form_appointment():
+    from .models.patient import Patient
+    from .models.doctor import Doctor
+    patients = Patient.query.all()
+    doctors = Doctor.query.all()
+    conflict = False
     if request.method == "POST":
         patient_id = request.form["patient_id"]
         doctor_id = request.form["doctor_id"]
         date = request.form["date"]
-        if has_conflict(doctor_id, date):
-            return "Conflito de horário", 409
-        db.session.add(Appointment(patient_id=patient_id, doctor_id=doctor_id, date=date))
+        recurrence = request.form.get("recurrence", "once")
+        # datetime-local retorna "YYYY-MM-DDTHH:MM", converter para "YYYY-MM-DD HH:MM"
+        date_fmt = date.replace("T", " ") if "T" in date else date
+        dates = []
+        dt = datetime.strptime(date_fmt, "%Y-%m-%d %H:%M")
+        if recurrence == "once":
+            dates = [dt]
+        else:
+            interval = int(recurrence)
+            for i in range(5):  # Limite de 5 ocorrências para evitar spam
+                dates.append(dt + timedelta(days=interval * i))
+        for d in dates:
+            d_str = d.strftime("%Y-%m-%d %H:%M")
+            if has_conflict(doctor_id, d_str):
+                conflict = True
+            db.session.add(Appointment(patient_id=patient_id, doctor_id=doctor_id, date=d_str))
         db.session.commit()
-        return redirect("/")
-    return render_template("form_appointment.html")
+        return render_template("form_appointment.html", patients=patients, doctors=doctors, conflict=conflict, success=True)
+    return render_template("form_appointment.html", patients=patients, doctors=doctors)
+
+@bp.route("/edit/appointment/<int:id>", methods=["GET", "POST"])
+def edit_appointment(id):
+    appointment = db.session.get(Appointment, id)
+    if not appointment:
+        return "Consulta não encontrada", 404
+    patients = Patient.query.all()
+    doctors = Doctor.query.all()
+    conflict = False
+    if request.method == "POST":
+        date = request.form["date"]
+        date_fmt = date.replace("T", " ") if "T" in date else date
+        if has_conflict(appointment.doctor_id, date_fmt) and appointment.date != date_fmt:
+            conflict = True
+        appointment.date = date_fmt
+        db.session.commit()
+        return render_template("form_appointment.html", appointment=appointment, patients=patients, doctors=doctors, edit=True, conflict=conflict, success=True)
+    return render_template("form_appointment.html", appointment=appointment, patients=patients, doctors=doctors, edit=True)

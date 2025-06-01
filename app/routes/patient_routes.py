@@ -7,12 +7,16 @@ bp = Blueprint('patients', __name__, url_prefix='/patients')
 @bp.route('/', methods=['POST'])
 def create_patient():
     data = request.get_json()
+    required = ['first_name', 'last_name', 'phone', 'address', 'email']
+    for field in required:
+        if not data.get(field):
+            return jsonify({"error": f"Campo obrigatorio ausente: {field}"}), 400
     patient = Patient(
         first_name=data['first_name'],
         last_name=data['last_name'],
         phone=data['phone'],
         address=data['address'],
-        email=data.get('email')  # novo campo
+        email=data.get('email')
     )
     db.session.add(patient)
     db.session.commit()
@@ -31,6 +35,9 @@ def edit_patient(id):
     patient = db.session.get(Patient, id)
     if not patient:
         return jsonify({"error": "Paciente não encontrado"}), 404
+    for field in ['first_name', 'last_name', 'phone', 'address', 'email']:
+        if field in data and not data[field]:
+            return jsonify({"error": f"Campo obrigatorio ausente: {field}"}), 400
     patient.first_name = data.get('first_name', patient.first_name)
     patient.last_name = data.get('last_name', patient.last_name)
     patient.phone = data.get('phone', patient.phone)

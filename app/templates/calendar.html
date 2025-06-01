@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-3">Calendário de Consultas</h2>
+<form method="get" class="mb-3">
+  <div class="row g-2 align-items-center">
+    <div class="col-auto">
+      <label for="sort" class="col-form-label">Ordenar por:</label>
+    </div>
+    <div class="col-auto">
+      <select name="sort" id="sort" class="form-select" onchange="this.form.submit()">
+        <option value="date" {% if sort == 'date' %}selected{% endif %}>Data/Hora</option>
+        <option value="doctor_id" {% if sort == 'doctor_id' %}selected{% endif %}>Médico</option>
+        <option value="patient_id" {% if sort == 'patient_id' %}selected{% endif %}>Paciente</option>
+      </select>
+    </div>
+  </div>
+</form>
+<div class="table-responsive">
+<table class="table table-bordered align-middle">
+  <thead class="table-info">
+    <tr>
+      <th>Data/Hora</th>
+      <th>Médico</th>
+      <th>Paciente</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for a in appointments %}
+    <tr>
+      <td>{{ a.date }}</td>
+      <td>{{ doctors[a.doctor_id] }}</td>
+      <td>{{ patients[a.patient_id] }}</td>
+      <td>
+        <a href="/edit/appointment/{{ a.id }}" class="btn btn-warning btn-sm">Editar</a>
+        <form method="post" action="/appointments/{{ a.id }}/cancel" style="display:inline;" onsubmit="return confirm('Deseja cancelar esta consulta?');">
+          <input type="hidden" name="_method" value="DELETE">
+          <button type="submit" class="btn btn-danger btn-sm">Cancelar</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+<script>
+document.addEventListener('submit', function(e) {
+  if (e.target.method === 'post' && e.target.action.includes('/cancel')) {
+    e.preventDefault();
+    fetch(e.target.action, {method: 'DELETE'})
+      .then(resp => resp.json())
+      .then(data => window.location.reload());
+  }
+});
+</script>
+{% endblock %}

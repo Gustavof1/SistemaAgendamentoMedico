@@ -1,21 +1,24 @@
 {% extends "base.html" %}
 {% block content %}
-<form method="post">
-  <div class="mb-3">
+<h2 class="mb-3">{{ 'Editar Paciente' if edit else 'Cadastrar Paciente' }}</h2>
+<form method="post" class="row g-3">
+  <div class="col-md-6">
     <input class="form-control" name="first_name" placeholder="Nome" value="{{ patient.first_name if edit else '' }}">
   </div>
-  <div class="mb-3">
+  <div class="col-md-6">
     <input class="form-control" name="last_name" placeholder="Sobrenome" value="{{ patient.last_name if edit else '' }}">
   </div>
-  <div class="mb-3">
+  <div class="col-md-6">
     <input class="form-control" name="phone" placeholder="Telefone" value="{{ patient.phone if edit else '' }}">
   </div>
-  <div class="mb-3">
+  <div class="col-md-6">
     <input class="form-control" name="address" placeholder="Endereço" value="{{ patient.address if edit else '' }}">
   </div>
-  <div class="mb-3">
+  <div class="col-md-12">
     <input class="form-control" name="email" placeholder="Email" value="{{ patient.email if edit else '' }}">
   </div>
-  <button class="btn btn-primary">{{ 'Salvar' if edit else 'Cadastrar' }}</button>
+  <div class="col-12">
+    <button class="btn btn-primary w-100">{{ 'Salvar' if edit else 'Cadastrar' }}</button>
+  </div>
 </form>
 {% endblock %}

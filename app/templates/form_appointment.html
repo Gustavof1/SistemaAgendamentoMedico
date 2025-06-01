@@ -1,9 +1,50 @@
 {% extends "base.html" %}
 {% block content %}
-<form method="post">
-  <div class="mb-3"><input class="form-control" name="patient_id" placeholder="ID do Paciente"></div>
-  <div class="mb-3"><input class="form-control" name="doctor_id" placeholder="ID do Médico"></div>
-  <div class="mb-3"><input class="form-control" name="date" placeholder="Data/Hora (ex: 2025-06-01 10:00)"></div>
-  <button class="btn btn-primary">Agendar</button>
+<h2 class="mb-3">{{ 'Editar Consulta' if edit else 'Agendar Consulta' }}</h2>
+{% if conflict %}
+  <div class="alert alert-warning">Atenção: Existe conflito de horário para o médico selecionado. A consulta foi marcada mesmo assim.</div>
+{% endif %}
+{% if success %}
+  <div class="alert alert-success">Consulta(s) agendada(s) com sucesso!</div>
+{% endif %}
+<form method="post" class="row g-3">
+  <div class="col-md-6">
+    <select class="form-control" name="patient_id" required {% if edit %}disabled{% endif %}>
+      <option value="">Selecione o Paciente</option>
+      {% for p in patients %}
+        <option value="{{ p.id }}" {% if edit and appointment.patient_id == p.id %}selected{% endif %}>{{ p.first_name }} {{ p.last_name }}</option>
+      {% endfor %}
+    </select>
+    {% if edit %}
+      <input type="hidden" name="patient_id" value="{{ appointment.patient_id }}">
+    {% endif %}
+  </div>
+  <div class="col-md-6">
+    <select class="form-control" name="doctor_id" required {% if edit %}disabled{% endif %}>
+      <option value="">Selecione o Médico</option>
+      {% for d in doctors %}
+        <option value="{{ d.id }}" {% if edit and appointment.doctor_id == d.id %}selected{% endif %}>{{ d.first_name }} {{ d.last_name }}</option>
+      {% endfor %}
+    </select>
+    {% if edit %}
+      <input type="hidden" name="doctor_id" value="{{ appointment.doctor_id }}">
+    {% endif %}
+  </div>
+  <div class="col-md-6">
+    <input class="form-control" type="datetime-local" name="date"
+      value="{% if edit %}{{ appointment.date[:10] }}T{{ appointment.date[11:16] }}{% endif %}"
+      required>
+  </div>
+  <div class="col-md-6">
+    <select class="form-control" name="recurrence" {% if edit %}disabled{% endif %}>
+      <option value="once">Consulta única</option>
+      <option value="15">Recorrente a cada 15 dias</option>
+      <option value="30">Recorrente a cada 30 dias</option>
+      <option value="60">Recorrente a cada 60 dias</option>
+    </select>
+  </div>
+  <div class="col-12">
+    <button class="btn btn-success w-100">{{ 'Salvar' if edit else 'Agendar' }}</button>
+  </div>
 </form>
 {% endblock %}

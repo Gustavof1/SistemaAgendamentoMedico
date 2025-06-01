@@ -1,10 +1,27 @@
 {% extends "base.html" %}
 {% block content %}
-<ul class="list-group">
-  <li class="list-group-item"><a href="/form/patient">Cadastrar Paciente</a></li>
-  <li class="list-group-item"><a href="/form/doctor">Cadastrar Médico</a></li>
-  <li class="list-group-item"><a href="/form/appointment">Agendar Consulta</a></li>
-  <li class="list-group-item"><a href="/patients">Listar Pacientes</a></li>
-  <li class="list-group-item"><a href="/doctors">Listar Médicos</a></li>
-</ul>
+<div class="text-center">
+  <h2 class="mb-4">Bem-vindo ao Sistema de Agendamento Médico</h2>
+  <p class="lead mb-4"> - </p>
+  <div class="row g-3 justify-content-center">
+    <div class="col-12 col-md-4">
+      <a href="/form/patient" class="btn btn-outline-primary w-100 py-3">Cadastrar Paciente</a>
+    </div>
+    <div class="col-12 col-md-4">
+      <a href="/form/doctor" class="btn btn-outline-primary w-100 py-3">Cadastrar Médico</a>
+    </div>
+    <div class="col-12 col-md-4">
+      <a href="/form/appointment" class="btn btn-outline-success w-100 py-3">Agendar Consulta</a>
+    </div>
+    <div class="col-12 col-md-4">
+      <a href="/patients" class="btn btn-outline-secondary w-100 py-3">Listar Pacientes</a>
+    </div>
+    <div class="col-12 col-md-4">
+      <a href="/doctors" class="btn btn-outline-secondary w-100 py-3">Listar Médicos</a>
+    </div>
+    <div class="col-12 col-md-4">
+      <a href="/calendar" class="btn btn-outline-info w-100 py-3">Calendário de Consultas</a>
+    </div>
+  </div>
+</div>
 {% endblock %}

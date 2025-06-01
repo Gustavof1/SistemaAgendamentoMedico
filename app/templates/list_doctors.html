@@ -1,18 +1,48 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Médicos</h2>
-<a href="/form/doctor" class="btn btn-sm btn-success mb-3">Novo Médico</a>
-<table class="table table-striped">
-<tr><th>Nome</th><th>Endereço da Clínica</th><th>Ações</th></tr>
+<h2 class="mb-3">Médicos</h2>
+<a href="/form/doctor" class="btn btn-success mb-3">Novo Médico</a>
+<form method="get" class="mb-3">
+  <div class="row g-2 align-items-center">
+    <div class="col-auto">
+      <label for="sort" class="col-form-label">Ordenar por:</label>
+    </div>
+    <div class="col-auto">
+      <select name="sort" id="sort" class="form-select" onchange="this.form.submit()">
+        <option value="first_name" {% if sort == 'first_name' %}selected{% endif %}>Nome</option>
+        <option value="last_name" {% if sort == 'last_name' %}selected{% endif %}>Sobrenome</option>
+        <option value="clinic_address" {% if sort == 'clinic_address' %}selected{% endif %}>Endereço da Clínica</option>
+        <option value="specialty" {% if sort == 'specialty' %}selected{% endif %}>Especialidade</option>
+        <option value="email" {% if sort == 'email' %}selected{% endif %}>Email</option>
+      </select>
+    </div>
+  </div>
+</form>
+<div class="table-responsive">
+<table class="table table-striped align-middle">
+<thead class="table-primary">
+<tr>
+  <th>Nome</th>
+  <th>Endereço da Clínica</th>
+  <th>Especialidade</th>
+  <th>Email</th>
+  <th>Ações</th>
+</tr>
+</thead>
+<tbody>
 {% for d in doctors %}
 <tr>
   <td>{{ d.first_name }} {{ d.last_name }}</td>
   <td>{{ d.clinic_address }}</td>
+  <td>{{ d.specialty }}</td>
+  <td>{{ d.email }}</td>
   <td>
     <a href="/edit/doctor/{{ d.id }}" class="btn btn-warning btn-sm">Editar</a>
     <a href="/delete/doctor/{{ d.id }}" class="btn btn-danger btn-sm">Excluir</a>
   </td>
 </tr>
 {% endfor %}
+</tbody>
 </table>
+</div>
 {% endblock %}

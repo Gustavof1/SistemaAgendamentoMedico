@@ -73,7 +73,9 @@ def form_doctor():
         d = Doctor(
             first_name=request.form["first_name"],
             last_name=request.form["last_name"],
-            clinic_address=request.form["clinic_address"]
+            clinic_address=request.form["clinic_address"],
+            specialty=request.form["specialty"],
+            email=request.form["email"]
         )
         db.session.add(d)
         db.session.commit()
@@ -89,6 +91,8 @@ def edit_doctor(id):
         doctor.first_name = request.form["first_name"]
         doctor.last_name = request.form["last_name"]
         doctor.clinic_address = request.form["clinic_address"]
+        doctor.specialty = request.form["specialty"]
+        doctor.email = request.form["email"]
         db.session.commit()
         return redirect("/doctors")
     return render_template("form_doctor.html", doctor=doctor, edit=True)

@@ -15,7 +15,35 @@ def test_create_doctor():
             "email": "joaosouza@email.com"
         })
         assert response.status_code == 201
-        assert response.get_json()["first_name"] == "João"
+        data = response.get_json()
+        assert data["first_name"] == "João"
+        assert data["specialty"] == "Cardiologia"
+        assert data["email"] == "joaosouza@email.com"
+
+def test_create_doctor_missing_fields():
+    app = create_app()
+    client = app.test_client()
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
+        # Faltando specialty
+        resp = client.post("/doctors/", json={
+            "first_name": "Maria",
+            "last_name": "Silva",
+            "clinic_address": "Rua XPTO",
+            "email": "maria@teste.com"
+        })
+        assert resp.status_code == 400
+        assert b"Campo obrigatorio ausente" in resp.data
+        # Faltando email
+        resp2 = client.post("/doctors/", json={
+            "first_name": "Carlos",
+            "last_name": "Oliveira",
+            "clinic_address": "Rua YYY",
+            "specialty": "Ortopedia"
+        })
+        assert resp2.status_code == 400
+        assert b"Campo obrigatorio ausente" in resp2.data
 
 def test_edit_doctor():
     app = create_app()

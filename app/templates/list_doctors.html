@@ -26,6 +26,7 @@
   <th>Endereço da Clínica</th>
   <th>Especialidade</th>
   <th>Email</th>
+  <th>Saldo (R$)</th>
   <th>Ações</th>
 </tr>
 </thead>
@@ -36,6 +37,7 @@
   <td>{{ d.clinic_address }}</td>
   <td>{{ d.specialty }}</td>
   <td>{{ d.email }}</td>
+  <td>{{ d.total_earned()|round(2) }}</td>
   <td>
     <a href="/edit/doctor/{{ d.id }}" class="btn btn-warning btn-sm">Editar</a>
     <a href="/delete/doctor/{{ d.id }}" class="btn btn-danger btn-sm">Excluir</a>

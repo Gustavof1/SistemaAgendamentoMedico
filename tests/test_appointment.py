@@ -17,7 +17,8 @@ def test_create_appointment_without_conflict():
         response = client.post("/appointments/", json={
             "patient_id": p.id,
             "doctor_id": d.id,
-            "date": "2025-06-01 10:00"
+            "date": "2025-06-01 10:00",
+            "price": 200
         })
         assert response.status_code == 201
 
@@ -34,12 +35,14 @@ def test_create_appointment_with_conflict():
         client.post("/appointments/", json={
             "patient_id": p.id,
             "doctor_id": d.id,
-            "date": "2025-06-01 10:00"
+            "date": "2025-06-01 10:00",
+            "price": 200
         })
         response = client.post("/appointments/", json={
             "patient_id": p.id,
             "doctor_id": d.id,
-            "date": "2025-06-01 10:00"
+            "date": "2025-06-01 10:00",
+            "price": 200
         })
         assert response.status_code == 409
 
@@ -49,18 +52,19 @@ def test_calendar_page():
     with app.app_context():
         db.drop_all()
         db.create_all()
-        p = Patient(first_name="Joana", last_name="Oliveira", phone="111", address="Rua B")
+        # Adicione has_insurance para evitar erro no template
+        p = Patient(first_name="Joana", last_name="Oliveira", phone="111", address="Rua B", has_insurance=False)
         d = Doctor(first_name="José", last_name="Lima", email="doutorjoselima@email.com", specialty="Pediatra", clinic_address="Rua Clínica")
         db.session.add_all([p, d])
         db.session.commit()
-        db.session.add(Appointment(patient_id=p.id, doctor_id=d.id, date="2025-06-01 10:00"))
+        db.session.add(Appointment(patient_id=p.id, doctor_id=d.id, date="2099-06-01 10:00", price=200))
         db.session.commit()
         resp = client.get("/calendar")
         assert resp.status_code == 200
         html = resp.data.decode()
         assert "Joana Oliveira" in html
         assert "José Lima" in html
-        assert "2025-06-01 10:00" in html
+        assert "2099-06-01 10:00" in html
 
 def test_create_appointment_dropdown():
     app = create_app()
@@ -76,7 +80,8 @@ def test_create_appointment_dropdown():
         response = client.post("/form/appointment", data={
             "patient_id": str(p.id),
             "doctor_id": str(d.id),
-            "date": "2025-07-01 09:00"
+            "date": "2025-07-01 09:00",
+            "price": 200
         }, follow_redirects=True)
         assert response.status_code == 200
         # Verifica se a consulta foi criada
@@ -89,11 +94,12 @@ def test_edit_appointment():
     with app.app_context():
         db.drop_all()
         db.create_all()
-        p = Patient(first_name="Joana", last_name="Oliveira", phone="111", address="Rua B")
+        # Use datas futuras para garantir edição
+        p = Patient(first_name="Joana", last_name="Oliveira", phone="111", address="Rua B", has_insurance=False)
         d = Doctor(first_name="José", last_name="Lima", email="doutorjoselima@email.com", specialty="Pediatra", clinic_address="Rua Clínica")
         db.session.add_all([p, d])
         db.session.commit()
-        ap = Appointment(patient_id=p.id, doctor_id=d.id, date="2025-06-01 10:00")
+        ap = Appointment(patient_id=p.id, doctor_id=d.id, date="2099-06-01 10:00", price=200)
         db.session.add(ap)
         db.session.commit()
         # GET da página de edição
@@ -101,11 +107,11 @@ def test_edit_appointment():
         assert resp.status_code == 200
         # POST para editar a data/hora
         response = client.post(f"/edit/appointment/{ap.id}", data={
-            "date": "2025-06-01 11:00"
+            "date": "2099-06-01 11:00"
         }, follow_redirects=True)
         assert response.status_code == 200
         ap2 = db.session.get(Appointment, ap.id)
-        assert ap2.date == "2025-06-01 11:00"
+        assert ap2.date == "2099-06-01 11:00"
 
 def test_create_appointment_conflict_warning():
     app = create_app()
@@ -122,14 +128,16 @@ def test_create_appointment_conflict_warning():
             "patient_id": str(p.id),
             "doctor_id": str(d.id),
             "date": "2025-07-01T09:00",
-            "recurrence": "once"
+            "recurrence": "once",
+            "price": 200
         }, follow_redirects=True)
         # Segunda consulta em conflito (mesmo horário)
         resp = client.post("/form/appointment", data={
             "patient_id": str(p.id),
             "doctor_id": str(d.id),
             "date": "2025-07-01T09:15",
-            "recurrence": "once"
+            "recurrence": "once",
+            "price": 200
         }, follow_redirects=True)
         assert resp.status_code == 200
         html = resp.data.decode()
@@ -149,7 +157,8 @@ def test_create_appointment_recurrence():
             "patient_id": str(p.id),
             "doctor_id": str(d.id),
             "date": "2025-07-01T09:00",
-            "recurrence": "15"
+            "recurrence": "15",
+            "price": 200
         }, follow_redirects=True)
         assert resp.status_code == 200
         # Deve criar 5 consultas com intervalo de 15 dias
@@ -167,7 +176,7 @@ def test_cancel_appointment():
         d = Doctor(first_name="José", last_name="Lima", clinic_address="Rua Clínica", specialty="Cardiologia", email="jose@medico.com")
         db.session.add_all([p, d])
         db.session.commit()
-        ap = Appointment(patient_id=p.id, doctor_id=d.id, date="2025-06-01 10:00")
+        ap = Appointment(patient_id=p.id, doctor_id=d.id, date="2025-06-01 10:00", price=200)
         db.session.add(ap)
         db.session.commit()
         resp = client.delete(f"/appointments/{ap.id}")
@@ -217,3 +226,61 @@ def test_create_patient_missing_fields():
         })
         assert resp.status_code == 400
         assert b"Campo obrigatorio ausente" in resp.data
+
+def test_create_appointment_with_and_without_insurance():
+    app = create_app()
+    client = app.test_client()
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
+        # Paciente sem convênio
+        p1 = Patient(first_name="Joana", last_name="Oliveira", phone="111", address="Rua B", has_insurance=False)
+        # Paciente com convênio
+        p2 = Patient(first_name="Ana", last_name="Carvallho", phone="111", address="Rua B", has_insurance=True)
+        d = Doctor(first_name="José", last_name="Lima", email="doutorjoselima@email.com", specialty="Pediatra", clinic_address="Rua Clínica")
+        db.session.add_all([p1, p2, d])
+        db.session.commit()
+        # Sem convênio
+        resp1 = client.post("/appointments/", json={
+            "patient_id": p1.id,
+            "doctor_id": d.id,
+            "date": "2025-06-01 10:00",
+            "price": 200
+        })
+        assert resp1.status_code == 201
+        assert resp1.get_json()["price_paid"] == 200
+        # Com convênio
+        resp2 = client.post("/appointments/", json={
+            "patient_id": p2.id,
+            "doctor_id": d.id,
+            "date": "2025-06-01 11:00",
+            "price": 200
+        })
+        assert resp2.status_code == 201
+        assert resp2.get_json()["price_paid"] == 100
+
+def test_doctor_total_earned():
+    app = create_app()
+    client = app.test_client()
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
+        p1 = Patient(first_name="Joana", last_name="Oliveira", phone="111", address="Rua B", has_insurance=False)
+        p2 = Patient(first_name="Ana", last_name="Carvallho", phone="111", address="Rua B", has_insurance=True)
+        d = Doctor(first_name="José", last_name="Lima", email="doutorjoselima@email.com", specialty="Pediatra", clinic_address="Rua Clínica")
+        db.session.add_all([p1, p2, d])
+        db.session.commit()
+        client.post("/appointments/", json={
+            "patient_id": p1.id,
+            "doctor_id": d.id,
+            "date": "2025-06-01 10:00",
+            "price": 200
+        })
+        client.post("/appointments/", json={
+            "patient_id": p2.id,
+            "doctor_id": d.id,
+            "date": "2025-06-01 11:00",
+            "price": 200
+        })
+        total = d.total_earned()
+        assert total == 300

@@ -17,6 +17,13 @@
   <div class="col-md-12">
     <input class="form-control" name="email" placeholder="Email" value="{{ patient.email if edit else '' }}">
   </div>
+  <div class="col-md-12">
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" name="has_insurance" id="has_insurance"
+        {% if edit and patient.has_insurance %}checked{% endif %}>
+      <label class="form-check-label" for="has_insurance">Possui convênio?</label>
+    </div>
+  </div>
   <div class="col-12">
     <button class="btn btn-primary w-100">{{ 'Salvar' if edit else 'Cadastrar' }}</button>
   </div>

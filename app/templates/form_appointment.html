@@ -1,13 +1,19 @@
 {% extends "base.html" %}
 {% block content %}
 <h2 class="mb-3">{{ 'Editar Consulta' if edit else 'Agendar Consulta' }}</h2>
+{% if is_past %}
+  <div class="alert alert-info">Esta consulta já foi realizada e não pode ser editada.</div>
+{% endif %}
 {% if conflict %}
   <div class="alert alert-warning">Atenção: Existe conflito de horário para o médico selecionado. A consulta foi marcada mesmo assim.</div>
 {% endif %}
 {% if success %}
   <div class="alert alert-success">Consulta(s) agendada(s) com sucesso!</div>
+  {% if price_paid is defined %}
+    <div class="alert alert-info">Valor pago pelo paciente: R$ {{ price_paid|round(2) }}</div>
+  {% endif %}
 {% endif %}
-<form method="post" class="row g-3">
+<form method="post" class="row g-3" {% if is_past %}style="pointer-events:none;opacity:0.6;"{% endif %}>
   <div class="col-md-6">
     <select class="form-control" name="patient_id" required {% if edit %}disabled{% endif %}>
       <option value="">Selecione o Paciente</option>
@@ -33,9 +39,13 @@
   <div class="col-md-6">
     <input class="form-control" type="datetime-local" name="date"
       value="{% if edit %}{{ appointment.date[:10] }}T{{ appointment.date[11:16] }}{% endif %}"
-      required>
+      required {% if is_past %}disabled{% endif %}>
   </div>
-  <div class="col-md-6">
+  <div class="col-md-3">
+    <input class="form-control" type="number" step="0.01" min="0" name="price" placeholder="Preço da consulta"
+      value="{% if edit %}{{ appointment.price|round(2) }}{% endif %}" required {% if is_past %}disabled{% endif %}>
+  </div>
+  <div class="col-md-3">
     <select class="form-control" name="recurrence" {% if edit %}disabled{% endif %}>
       <option value="once">Consulta única</option>
       <option value="15">Recorrente a cada 15 dias</option>
@@ -44,7 +54,7 @@
     </select>
   </div>
   <div class="col-12">
-    <button class="btn btn-success w-100">{{ 'Salvar' if edit else 'Agendar' }}</button>
+    <button class="btn btn-success w-100" {% if is_past %}disabled{% endif %}>{{ 'Salvar' if edit else 'Agendar' }}</button>
   </div>
 </form>
 {% endblock %}

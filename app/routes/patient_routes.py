@@ -16,7 +16,8 @@ def create_patient():
         last_name=data['last_name'],
         phone=data['phone'],
         address=data['address'],
-        email=data.get('email')
+        email=data.get('email'),
+        has_insurance=data.get('has_insurance', False)
     )
     db.session.add(patient)
     db.session.commit()
@@ -26,7 +27,8 @@ def create_patient():
         "last_name": patient.last_name,
         "phone": patient.phone,
         "address": patient.address,
-        "email": patient.email
+        "email": patient.email,
+        "has_insurance": patient.has_insurance
     }), 201
 
 @bp.route('/<int:id>', methods=['PUT'])
@@ -43,6 +45,8 @@ def edit_patient(id):
     patient.phone = data.get('phone', patient.phone)
     patient.address = data.get('address', patient.address)
     patient.email = data.get('email', patient.email)
+    if 'has_insurance' in data:
+        patient.has_insurance = data['has_insurance']
     db.session.commit()
     return jsonify({
         "id": patient.id,
@@ -50,5 +54,6 @@ def edit_patient(id):
         "last_name": patient.last_name,
         "phone": patient.phone,
         "address": patient.address,
-        "email": patient.email
+        "email": patient.email,
+        "has_insurance": patient.has_insurance
     })

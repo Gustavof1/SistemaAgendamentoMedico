@@ -7,3 +7,4 @@ class Patient(db.Model):
     phone = db.Column(db.String(20))
     address = db.Column(db.String(200))
     email = db.Column(db.String(120))  # novo campo
+    has_insurance = db.Column(db.Boolean, default=False)  # novo campo

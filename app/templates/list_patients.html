@@ -19,7 +19,7 @@
 <div class="table-responsive">
 <table class="table table-striped align-middle">
 <thead class="table-primary">
-<tr><th>Nome</th><th>Telefone</th><th>Endereço</th><th>Email</th><th>Ações</th></tr>
+<tr><th>Nome</th><th>Telefone</th><th>Endereço</th><th>Email</th><th>Convênio</th><th>Ações</th></tr>
 </thead>
 <tbody>
 {% for p in patients %}
@@ -28,6 +28,7 @@
   <td>{{ p.phone }}</td>
   <td>{{ p.address }}</td>
   <td>{{ p.email }}</td>
+  <td>{% if p.has_insurance %}Sim{% else %}Não{% endif %}</td>
   <td>
     <a href="/edit/patient/{{ p.id }}" class="btn btn-warning btn-sm">Editar</a>
     <a href="/delete/patient/{{ p.id }}" class="btn btn-danger btn-sm">Excluir</a>

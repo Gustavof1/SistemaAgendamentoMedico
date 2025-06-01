@@ -22,17 +22,24 @@
       <th>Data/Hora</th>
       <th>Médico</th>
       <th>Paciente</th>
+      <th>Preço (R$)</th>
       <th>Ações</th>
     </tr>
   </thead>
   <tbody>
     {% for a in appointments %}
-    <tr>
+    {% set appt_dt = a.date|datetimeformat('%Y-%m-%d %H:%M') %}
+    {% set now_dt = now|datetimeformat('%Y-%m-%d %H:%M') %}
+    {% set is_past = (a.date|datetimeformat('%Y-%m-%d %H:%M') < now|datetimeformat('%Y-%m-%d %H:%M')) %}
+    <tr class="{% if is_past %}table-secondary{% else %}table-success{% endif %}">
       <td>{{ a.date }}</td>
       <td>{{ doctors[a.doctor_id] }}</td>
       <td>{{ patients[a.patient_id] }}</td>
+      <td>{{ a.price|round(2) }}</td>
       <td>
-        <a href="/edit/appointment/{{ a.id }}" class="btn btn-warning btn-sm">Editar</a>
+        {% if not is_past %}
+          <a href="/edit/appointment/{{ a.id }}" class="btn btn-warning btn-sm">Editar</a>
+        {% endif %}
         <form method="post" action="/appointments/{{ a.id }}/cancel" style="display:inline;" onsubmit="return confirm('Deseja cancelar esta consulta?');">
           <input type="hidden" name="_method" value="DELETE">
           <button type="submit" class="btn btn-danger btn-sm">Cancelar</button>

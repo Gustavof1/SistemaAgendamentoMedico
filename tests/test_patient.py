@@ -12,12 +12,14 @@ def test_create_patient():
             "last_name": "Silva",
             "phone": "11999999999",
             "address": "Rua A, 123",
-            "email": "maria@teste.com"
+            "email": "maria@teste.com",
+            "has_insurance": True
         })
         assert response.status_code == 201
         data = response.get_json()
         assert data["first_name"] == "Maria"
         assert data["email"] == "maria@teste.com"
+        assert data["has_insurance"] is True
 
 def test_edit_patient():
     app = create_app()
@@ -30,7 +32,8 @@ def test_edit_patient():
             "last_name": "Pereira",
             "phone": "11988888888",
             "address": "Rua B, 456",
-            "email": "carlos@teste.com"
+            "email": "carlos@teste.com",
+            "has_insurance": False
         })
         pid = resp.get_json()["id"]
         response = client.put(f"/patients/{pid}", json={
@@ -38,9 +41,11 @@ def test_edit_patient():
             "last_name": "Pereira",
             "phone": "11988888888",
             "address": "Rua Nova, 789",
-            "email": "carloseditado@teste.com"
+            "email": "carloseditado@teste.com",
+            "has_insurance": True
         })
         assert response.status_code == 200
         data = response.get_json()
         assert data["address"] == "Rua Nova, 789"
         assert data["email"] == "carloseditado@teste.com"
+        assert data["has_insurance"] is True

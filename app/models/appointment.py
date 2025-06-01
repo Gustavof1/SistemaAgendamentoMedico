@@ -5,3 +5,4 @@ class Appointment(db.Model):
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
     doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
     date = db.Column(db.String(50), nullable=False)
+    price = db.Column(db.Float, nullable=False, default=0.0)  # novo campo

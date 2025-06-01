@@ -17,7 +17,8 @@ def create_app():
     app.register_blueprint(doctor_routes.bp)
     app.register_blueprint(appointment_routes.bp)
 
-    from .views import bp as views_bp
+    from .views import bp as views_bp, init_app
     app.register_blueprint(views_bp)
+    init_app(app)  # registra o filtro datetimeformat
 
     return app

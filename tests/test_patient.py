@@ -66,3 +66,29 @@ def test_patient_not_found():
         assert resp.status_code == 404
         assert b"Paciente nao encontrado" in resp.data
 
+def test_edit_patient_missing_field():
+    app = create_app()
+    client = app.test_client()
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
+        # Cria paciente válido
+        resp = client.post("/patients/", json={
+            "first_name": "Carlos",
+            "last_name": "Pereira",
+            "phone": "11988888888",
+            "address": "Rua B, 456",
+            "email": "carlos@teste.com",
+            "has_insurance": False
+        })
+        pid = resp.get_json()["id"]
+        # Tenta editar com campo vazio
+        response = client.put(f"/patients/{pid}", json={
+            "first_name": "",
+            "last_name": "Pereira",
+            "phone": "11988888888",
+            "address": "Rua B, 456",
+            "email": "carlos@teste.com"
+        })
+        assert response.status_code == 400
+        assert b"Campo obrigatorio ausente" in response.data

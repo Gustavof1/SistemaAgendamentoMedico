@@ -37,3 +37,13 @@ def cancel_appointment(id):
     db.session.delete(ap)
     db.session.commit()
     return jsonify({"message": "Consulta cancelada"}), 200
+
+@bp.route('/<int:id>/cancel', methods=['DELETE'])
+def cancel_appointment_alt(id):
+    # Permite cancelar consulta via /appointments/<id>/cancel
+    ap = db.session.get(Appointment, id)
+    if not ap:
+        return jsonify({"error": "Consulta nao encontrada"}), 404
+    db.session.delete(ap)
+    db.session.commit()
+    return jsonify({"message": "Consulta cancelada"}), 200

@@ -195,6 +195,35 @@ def test_cancel_nonexistent_appointment():
         assert resp.status_code == 404
         assert b"Consulta nao encontrada" in resp.data
 
+def test_cancel_appointment_by_cancel_route():
+    app = create_app()
+    client = app.test_client()
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
+        p = Patient(first_name="Joana", last_name="Oliveira", phone="111", address="Rua B", has_insurance=False)
+        d = Doctor(first_name="José", last_name="Lima", clinic_address="Rua Clínica", specialty="Cardiologia", email="jose@medico.com")
+        db.session.add_all([p, d])
+        db.session.commit()
+        ap = Appointment(patient_id=p.id, doctor_id=d.id, date="2099-06-01 10:00", price=200)
+        db.session.add(ap)
+        db.session.commit()
+        resp = client.delete(f"/appointments/{ap.id}/cancel")
+        assert resp.status_code == 200
+        assert b"Consulta cancelada" in resp.data
+        # Verifica se foi removido
+        assert db.session.get(Appointment, ap.id) is None
+
+def test_cancel_nonexistent_appointment_by_cancel_route():
+    app = create_app()
+    client = app.test_client()
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
+        resp = client.delete("/appointments/9999/cancel")
+        assert resp.status_code == 404
+        assert b"Consulta nao encontrada" in resp.data
+
 def test_create_doctor_missing_fields():
     app = create_app()
     client = app.test_client()

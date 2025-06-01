@@ -69,3 +69,20 @@ def test_edit_doctor():
         assert response.status_code == 200
         data = response.get_json()
         assert data["clinic_address"] == "Rua Y, 999"
+
+def test_edit_doctor_not_found():
+    app = create_app()
+    client = app.test_client()
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
+        resp = client.put("/doctors/9999", json={
+            "first_name": "Novo",
+            "last_name": "Nome",
+            "clinic_address": "Rua X",
+            "specialty": "Ortopedia",
+            "email": "novo@email.com"
+        })
+        assert resp.status_code == 404
+        assert b"Medico nao encontrado" in resp.data
+        

@@ -79,3 +79,34 @@ def test_integration_schedule_conflict_check(client):
     # 4. Agenda às 10:30 (sucesso)
     resp3 = client.post("/appointments/", json={"patient_id": pat_id, "doctor_id": doc_id, "date": "2025-09-10 10:30", "price": 100})
     assert resp3.status_code == 201
+
+def test_integration_doctor_total_earned_calculation(client):
+    """
+    Verifica se o método total_earned() do médico calcula o saldo corretamente, considerando os valores efetivamente pagos (com desconto de convênio).
+    1. Cria um médico e dois pacientes (um com convênio, outro sem).
+    2. Agenda consultas para ambos.
+    3. Busca o médico no banco de dados e chama o método total_earned().
+    4. Verifica se a soma corresponde aos valores pagos.
+    """
+    # 1. Cria entidades
+    app = client.application # Pega a instância da app para usar o app_context
+    with app.app_context():
+        # Usando a API para criar as entidades
+        resp_doc = client.post("/doctors/", json={"first_name": "Dr. Grana", "last_name": "Alta", "email": "grana@email.com", "specialty": "Financeiro", "clinic_address": "Banco"})
+        doc_id = resp_doc.get_json()["id"]
+        resp_p1 = client.post("/patients/", json={"first_name": "Paciente", "last_name": "A", "phone": "A", "address": "A", "email": "A@email.com", "has_insurance": False})
+        p1_id = resp_p1.get_json()["id"]
+        resp_p2 = client.post("/patients/", json={"first_name": "Paciente", "last_name": "B", "phone": "B", "address": "B", "email": "B@email.com", "has_insurance": True})
+        p2_id = resp_p2.get_json()["id"]
+
+    # 2. Agenda consultas via API
+    # Consulta 1: Preço original 200, pago 200 (sem convênio)
+    client.post("/appointments/", json={"patient_id": p1_id, "doctor_id": doc_id, "date": "2025-10-01 11:00", "price": 200})
+    # Consulta 2: Preço original 450, pago 225 (com convênio)
+    client.post("/appointments/", json={"patient_id": p2_id, "doctor_id": doc_id, "date": "2025-10-01 12:00", "price": 450})
+
+    # 3. Busca o médico e calcula o total
+    with app.app_context():
+        doctor = db.session.get(Doctor, doc_id)
+        # 4. Verifica o total: 200.0 + 225.0 = 425.0
+        assert doctor.total_earned() == 425.0

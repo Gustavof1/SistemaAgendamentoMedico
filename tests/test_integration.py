@@ -52,3 +52,30 @@ def test_integration_insurance_discount_logic(client):
     assert resp_app2.status_code == 201
     # Verifica se o preço pago é 50% do valor (150)
     assert resp_app2.get_json()["price_paid"] == 150.0
+
+def test_integration_schedule_conflict_check(client):
+    """
+    Verifica a regra de negócio que impede agendamentos conflitantes.
+    1. Cria um médico e um paciente.
+    2. Agenda uma consulta para as 10:00 (deve ter sucesso).
+    3. Tenta agendar outra consulta para o mesmo médico às 10:15 (deve falhar com conflito).
+    4. Tenta agendar outra consulta para o mesmo médico às 10:30 (deve ter sucesso).
+    """
+    # 1. Cria entidades
+    resp_doc = client.post("/doctors/", json={"first_name": "Dr. Plantão", "last_name": "S.", "email": "plantao@email.com", "specialty": "Emergência", "clinic_address": "Hospital"})
+    doc_id = resp_doc.get_json()["id"]
+    resp_pat = client.post("/patients/", json={"first_name": "Paciente", "last_name": "Urgente", "phone": "192", "address": "Rua Urgencia", "email": "urgente@email.com"})
+    pat_id = resp_pat.get_json()["id"]
+
+    # 2. Agenda às 10:00 (sucesso)
+    resp1 = client.post("/appointments/", json={"patient_id": pat_id, "doctor_id": doc_id, "date": "2025-09-10 10:00", "price": 100})
+    assert resp1.status_code == 201
+
+    # 3. Agenda às 10:15 (conflito)
+    resp2 = client.post("/appointments/", json={"patient_id": pat_id, "doctor_id": doc_id, "date": "2025-09-10 10:15", "price": 100})
+    assert resp2.status_code == 409 # 409 Conflict
+    assert "Doctor is already booked" in resp2.get_json()["error"]
+
+    # 4. Agenda às 10:30 (sucesso)
+    resp3 = client.post("/appointments/", json={"patient_id": pat_id, "doctor_id": doc_id, "date": "2025-09-10 10:30", "price": 100})
+    assert resp3.status_code == 201

@@ -2,3 +2,5 @@ flask==2.3.2
 flask-SQLAlchemy==3.1.1
 Werkzeug==2.3.7
 pytest==7.4.2
+selenium==4.33.0
+webdriver-manager==4.0.2

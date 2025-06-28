@@ -2,6 +2,7 @@ import pytest
 import threading
 import time
 import os
+import sys
 from app import create_app
 from app.database import db
 from app.models.patient import Patient
@@ -13,8 +14,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.edge.service import Service as EdgeService
 from webdriver_manager.microsoft import EdgeChromiumDriverManager
 from selenium.webdriver.edge.options import Options
-
-from selenium.webdriver.common.keys import Keys
 
 @pytest.fixture(scope="module")
 def app_for_system_tests():
@@ -47,9 +46,10 @@ def browser():
     """Inicializa e finaliza o navegador Edge para os testes."""
     options = Options()
     if os.environ.get('CI'):
-        options.add_argument("--headless")         # Roda o navegador sem interface gráfica (essencial para CI)
-        options.add_argument("--no-sandbox")       # Desativa uma camada de segurança que causa problemas em ambientes de CI
-        options.add_argument("--disable-dev-shm-usage") # Evita problemas de memória compartilhada em contêineres
+        options.add_argument("--headless=new")         # Roda o navegador sem interface gráfica (essencial para CI)
+        if sys.platform == "linux":
+            options.add_argument("--no-sandbox")       # Desativa uma camada de segurança que causa problemas em ambientes de CI
+            options.add_argument("--disable-dev-shm-usage") # Evita problemas de memória compartilhada em contêineres
     service = EdgeService(executable_path=EdgeChromiumDriverManager().install())
     driver = webdriver.Edge(service=service, options=options)   
     driver.implicitly_wait(10)

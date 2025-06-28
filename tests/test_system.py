@@ -50,6 +50,9 @@ def browser():
         if sys.platform == "linux":
             options.add_argument("--no-sandbox")       # Desativa uma camada de segurança que causa problemas em ambientes de CI
             options.add_argument("--disable-dev-shm-usage") # Evita problemas de memória compartilhada em contêineres
+        elif sys.platform == "darwin":  # macOS
+            options.add_argument("--disable-gpu") 
+            options.add_argument("--remote-debugging-port=9222")
     service = EdgeService(executable_path=EdgeChromiumDriverManager().install())
     driver = webdriver.Edge(service=service, options=options)   
     driver.implicitly_wait(10)

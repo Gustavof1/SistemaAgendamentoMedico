@@ -14,6 +14,8 @@ from selenium.webdriver.edge.service import Service as EdgeService
 from webdriver_manager.microsoft import EdgeChromiumDriverManager
 from selenium.webdriver.edge.options import Options
 
+from selenium.webdriver.common.keys import Keys
+
 @pytest.fixture(scope="module")
 def app_for_system_tests():
     """Fixture que cria a aplicação e pré-popula o banco de dados para os testes de UI."""
@@ -87,3 +89,54 @@ def test_system_register_patient_and_verify_on_list(live_server, browser):
     assert "Maria Navegador" in page_content
     assert "maria.nav@teste.com" in page_content
     assert "Sim" in page_content # Verifica se o convênio foi marcado como "Sim"
+
+def test_system_schedule_recurrent_appointment_and_verify_on_calendar(app_for_system_tests, live_server, browser):
+    """
+    Simula um usuário agendando consultas recorrentes e verificando no calendário.
+    1. Navega até o formulário de agendamento.
+    2. Seleciona o médico e paciente pré-cadastrados na fixture.
+    3. Preenche a data, o preço e seleciona a recorrência "a cada 15 dias".
+    4. Submete o formulário.
+    5. Verifica a mensagem de sucesso na tela.
+    6. Navega para a página do calendário.
+    7. Verifica se as 5 consultas recorrentes foram criadas e aparecem na lista.
+    """
+    # 1. Navega para o formulário
+    browser.get("http://localhost:5001/form/appointment")
+
+    with app_for_system_tests.app_context():
+        patient = Patient.query.filter_by(first_name="Paciente").first()
+        doctor = Doctor.query.filter_by(first_name="Dr. Exemplo").first()
+    
+    # 2. Preenche o formulário
+    Select(browser.find_element(By.NAME, "patient_id")).select_by_value(str(patient.id))
+    Select(browser.find_element(By.NAME, "doctor_id")).select_by_value(str(doctor.id))
+    date_input = browser.find_element(By.NAME, "date")
+    browser.execute_script("arguments[0].setAttribute('type', 'text')", date_input)
+
+    date_input.clear()
+    date_input.send_keys("2025-10-01 09:00") 
+    browser.find_element(By.NAME, "price").send_keys("500")
+    
+    # 3. Seleciona recorrência de 15 dias
+    Select(browser.find_element(By.NAME, "recurrence")).select_by_value("15")
+
+    # 4. Submete
+    browser.find_element(By.CSS_SELECTOR, "button.btn-success").click()
+
+    # 5. Verifica a mensagem de sucesso na própria página
+    WebDriverWait(browser, 10).until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, ".alert-success"), "Consulta(s) agendada(s) com sucesso!"))
+    # Verifica o valor a ser pago (com desconto, pois o paciente da fixture tem convênio)
+    assert "Valor a ser pago pelo paciente: R$ 250.00" in browser.page_source
+
+    # 6. Navega para o calendário
+    browser.get("http://localhost:5001/calendar")
+
+    # 7. Verifica se as 5 consultas existem na tabela
+    appointments_on_page = browser.find_elements(By.XPATH, f"//td[contains(text(), '{patient.first_name} {patient.last_name}')]")
+    assert len(appointments_on_page) == 5
+    
+    # Verifica a data da primeira e da última consulta para confirmar a recorrência
+    assert "2025-10-01 09:00" in browser.page_source # Primeira consulta
+    # 1 de Out + 60 dias (4 * 15) = 30 de Novembro
+    assert "2025-11-30 09:00" in browser.page_source # Última consulta

@@ -10,7 +10,7 @@
 {% if success %}
   <div class="alert alert-success">Consulta(s) agendada(s) com sucesso!</div>
   {% if price_paid is defined %}
-    <div class="alert alert-info">Valor a ser pago pelo paciente: R$ {{ price_paid|round(2) }}</div>
+    <div class="alert alert-info">Valor a ser pago pelo paciente: R$ {{ "%.2f"|format(price_paid|float) }}</div>
   {% endif %}
 {% endif %}
 <form method="post" class="row g-3" {% if is_past %}style="pointer-events:none;opacity:0.6;"{% endif %}>
